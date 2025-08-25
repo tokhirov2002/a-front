@@ -13,23 +13,22 @@ const VideosList = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
+    const [totalPages, setTotalPages] = useState(1); // Default to 1 to avoid NaN
 
     const fetchVideos = useCallback(async (page) => {
         try {
             setLoading(true);
             const response = await api.get(`/videos/?page=${page}`);
-            
-            // TO'G'IRLANGAN QISM: Ma'lumotlar endi .results ichidan olinadi
+            const count = response.data.count ?? 0; // Fallback to 0 if count is undefined
             const formattedVideos = (response.data.results || []).map(video => ({
                 ...video,
                 video_url: `${BACKEND_URL}${video.video_file}`
             }));
             setVideos(formattedVideos);
-            setTotalPages(Math.ceil(response.data.count / 10)); // Jami sahifalar sonini hisoblash
-
+            setTotalPages(Math.ceil(count / 10)); // Ensure count is a number
         } catch (error) {
             console.error("Videolarni yuklashda xatolik:", error);
+            toast.error("Videolarni yuklashda xato yuz berdi!");
         } finally {
             setLoading(false);
         }
@@ -44,7 +43,6 @@ const VideosList = () => {
             try {
                 await api.delete(`/videos/${id}/`);
                 toast.success("Video muvaffaqiyatli o'chirildi!");
-                // Agar o'chirilgan element sahifadagi yagona bo'lsa, avvalgi sahifaga o'tish
                 if (videos.length === 1 && currentPage > 1) {
                     setCurrentPage(currentPage - 1);
                 } else {
@@ -52,6 +50,7 @@ const VideosList = () => {
                 }
             } catch (error) {
                 console.error("Videoni o'chirishda xatolik:", error);
+                toast.error("Videoni o'chirishda xato yuz berdi!");
             }
         }
     };

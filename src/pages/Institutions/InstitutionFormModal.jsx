@@ -7,7 +7,7 @@ const InstitutionFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const [formData, setFormData] = useState({
     name: '',
     type: 'SHOP',
-    contact_info: '',
+    contact_info: '', // Bu maydon endi formaga qo'shiladi
     contract_start_date: '',
     contract_end_date: '',
   });
@@ -19,8 +19,11 @@ const InstitutionFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     } else {
       // Yangi qo'shish uchun formani tozalash
       setFormData({
-        name: '', type: 'SHOP', contact_info: '',
-        contract_start_date: '', contract_end_date: '',
+        name: '', 
+        type: 'SHOP', 
+        contact_info: '',
+        contract_start_date: '', 
+        contract_end_date: '',
       });
     }
   }, [initialData, isOpen]);
@@ -34,18 +37,26 @@ const InstitutionFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     setLoading(true);
     try {
       if (initialData?.id) {
-        // Tahrirlash
         await api.put(`/institutions/${initialData.id}/`, formData);
         toast.success("Muassasa muvaffaqiyatli yangilandi!");
       } else {
-        // Yaratish
         await api.post('/institutions/', formData);
         toast.success("Yangi muassasa muvaffaqiyatli qo'shildi!");
       }
-      onSuccess(); // Ro'yxatni yangilash uchun
-      onClose(); // Modalni yopish
+      onSuccess();
+      onClose();
     } catch (error) {
-      console.error("Xatolik:", error);
+      // Xatolikni aniqroq ko'rsatish
+      if (error.response && error.response.data) {
+        // DRF qaytargan xatoliklarni ajratib olish
+        const errorMessages = Object.entries(error.response.data)
+            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+            .join('\n');
+        toast.error(`Xatolik yuz berdi:\n${errorMessages}`);
+      } else {
+        toast.error("Serverga ulanishda xatolik yuz berdi.");
+      }
+      console.error("Xatolik:", error); // Konsolga to'liq xatoni chiqarish
     } finally {
       setLoading(false);
     }
@@ -67,6 +78,22 @@ const InstitutionFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             <option value="OTHER">Boshqa</option>
           </select>
         </div>
+        
+        {/* QO'SHILGAN QISM: Kontakt ma'lumotlari uchun maydon */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Kontakt ma'lumotlari</label>
+          <textarea 
+            name="contact_info" 
+            value={formData.contact_info} 
+            onChange={handleChange} 
+            required 
+            rows="3"
+            className="w-full mt-1 input-style"
+            placeholder="Telefon raqam, manzil va h.k."
+          />
+        </div>
+        {/* QO'SHILGAN QISM TUGADI */}
+
         <div>
           <label className="block text-sm font-medium text-gray-700">Shartnoma boshlanishi</label>
           <input type="date" name="contract_start_date" value={formData.contract_start_date} onChange={handleChange} required className="w-full mt-1 input-style" />

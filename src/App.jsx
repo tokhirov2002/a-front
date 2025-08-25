@@ -10,6 +10,9 @@ import Dashboard from './pages/Dashboard';
 import InstitutionsList from './pages/Institutions/InstitutionsList';
 import VideosList from './pages/Videos/VideosList';
 // Boshqa sahifalarni import qilish kerak bo'ladi
+import CommentsPage from './pages/Comments/CommentsPage'; // Import qilamiz
+import StatsPage from './pages/Stats/StatsPage'; // Import
+
 
 function App() {
   return (
@@ -22,6 +25,8 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/institutions" element={<InstitutionsList />} />
               <Route path="/videos" element={<VideosList />} />
+              <Route path="/comments" element={<CommentsPage />} /> {/* Yangi Route */}
+              <Route path="/stats" element={<StatsPage />} /> {/* Yangi Route */}
               {/* Boshqa sahifalar uchun Route'lar shu yerga qo'shiladi */}
             </Route>
           </Route>
